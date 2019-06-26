@@ -1,6 +1,7 @@
 package com.servdiscov.mainservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
@@ -13,8 +14,9 @@ public class MainServiceController {
 	
 	RestTemplate restTemplate = new RestTemplate();
 	
-//	@Autowired
-//	DiscoveryClient client;
+	
+	@Value("${product.service.name}")
+	private String productServiceName;
 	
 	@Autowired
 	LoadBalancerClient client;
@@ -22,19 +24,12 @@ public class MainServiceController {
 	@GetMapping("/products")
 	public String[] service() {
 		
-//		ServiceInstance serviceInstance =
-//		client.getInstances("main-product")
-//		.stream()
-//		.findFirst()
-//		.orElseThrow(()-> new RuntimeException("main product service not found"));
-		
-		ServiceInstance serviceInstance = client.choose("main-product");
+		ServiceInstance serviceInstance = client.choose(productServiceName);
 		org.apache.commons.lang.Validate.notNull(
 		serviceInstance, "main product service not found");
 		
 		String url = serviceInstance.getUri().toString() + "/rest/product/main";
-		
-//		String url = "http://localhost:8098/rest/product/main";
+	
 		return restTemplate.getForObject(url, String[].class);
 	}
 
